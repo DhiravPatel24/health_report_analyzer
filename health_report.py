@@ -1,5 +1,5 @@
-# health_report.py
 import pandas as pd
+import streamlit as st
 
 class HealthReport:
     def __init__(self, health_report):
@@ -9,8 +9,31 @@ class HealthReport:
         """
         Display the health report in a structured format.
         """
-        import streamlit as st
         st.title("Your Personalized Health Report 📄")
+        
+        # Display Test Results first in a table format
+        st.subheader("Test Results")
+        if self.health_report.get("test_results"):
+            test_results_data = []
+            for test in self.health_report["test_results"]:
+                test_name = test.get("test_name") or test.get("parameter")
+                test_results_data.append([
+                    test_name,
+                    test.get("value"),
+                    test.get("reference_range"),
+                    test.get("interpretation"),
+                    test.get("potential_implications")
+                ])
+            print(test_results_data)
+            # Create a DataFrame for the test results
+            df_test_results = pd.DataFrame(test_results_data, columns=[
+                "Test Parameter", "Value", "Reference Range", "Interpretation", "Potential Implications"
+            ])
+
+            # Display the test results table
+            st.table(df_test_results)
+        else:
+            st.write("No test results provided.")
         
         # Display Potential Diseases
         st.subheader("Potential Diseases")
@@ -50,3 +73,15 @@ class HealthReport:
                 st.write(f"- {doctor}")
         else:
             st.write("No specific doctor recommendations.")
+
+
+        st.subheader("Confirmed Diseases Based on Test Results")
+        if self.health_report.get("confirmed_diseases"):
+            for disease_info in self.health_report["confirmed_diseases"]:
+                st.write(f"**{disease_info['disease']}**")
+                st.write(f"Test Value: {disease_info.get('test_value', 'N/A')}")
+                if(disease_info.get('reference_range')):
+                    st.write(f"Reference Range: {disease_info.get('reference_range', 'N/A')}")
+                st.write(f"Reasoning: {disease_info['reasoning']}")
+        else:
+            st.write("No diseases have been confirmed based on the test results.")
